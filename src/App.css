@@ -1,0 +1,37 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.parent {
+  width: 100%;
+  margin: auto;
+  padding: 0.5rem;
+  background: #ffffff;
+}
+.file-upload {
+  text-align: center;
+  border: 3px dashed rgb(210, 227, 244);
+  padding: 0.5rem;
+  position: relative;
+  cursor: pointer;
+}
+.file-upload p {
+  font-size: 0.3rem;
+  margin-top: 10px;
+}
+.file-upload input {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  cursor: pointer;
+}
