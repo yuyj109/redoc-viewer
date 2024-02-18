@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RedocStandalone } from 'redoc';
+import yaml from 'js-yaml';
 import './App.css';
 
 const useQuery = () => {
@@ -14,6 +15,15 @@ function App() {
   const [file, setFile] = useState('');
   const [selectedName, setSelectedName] = useState('');
 
+  const isJson = (str: string) => {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       if (e.target.files) {
@@ -22,7 +32,11 @@ function App() {
         setSelectedName(e.target.files[0].name);
         fileReader.onloadend = (readerEvent: ProgressEvent<FileReader>) => {
           if (readerEvent?.target?.result) {
-            setFile(readerEvent.target.result.toString());
+            let result = readerEvent.target.result.toString();
+            if (!isJson(result)) {
+              result = JSON.stringify(yaml.load(result));
+            }
+            setFile(result);
           }
         };
       }
