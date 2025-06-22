@@ -1,13 +1,34 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RedocStandalone } from 'redoc';
 import yaml from 'js-yaml';
+import mermaid from 'mermaid';
 import './App.css';
 
 const useQuery = () => {
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
 };
+
+function renderMermaidInRedoc() {
+  // Redoc内のmermaidコードブロックをSVGに変換
+  const codeBlocks = document.querySelectorAll('code.language-mermaid');
+  codeBlocks.forEach(async (block, idx) => {
+    const parent = block.parentElement;
+    if (!parent || parent.getAttribute('data-mermaid-rendered')) return;
+    const chart = block.textContent || '';
+    try {
+      // mermaid.renderはPromiseを返す（v10以降）
+      const { svg } = await mermaid.render(`redoc-mermaid-${idx}`, chart);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = svg;
+      parent.replaceWith(wrapper);
+      parent.setAttribute('data-mermaid-rendered', 'true');
+    } catch (e) {
+      parent.setAttribute('data-mermaid-rendered', 'error');
+    }
+  });
+}
 
 function App() {
   const query = useQuery();
@@ -45,6 +66,11 @@ function App() {
       setSelectedName('');
     }
   };
+
+  useEffect(() => {
+    // Redoc描画後にMermaid変換を試みる
+    setTimeout(renderMermaidInRedoc, 500);
+  }, [file, url]);
 
   if (url && /https:\/\/.*\.[json|y?ml]/.test(url)) {
     return (
