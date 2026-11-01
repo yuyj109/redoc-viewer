@@ -77,7 +77,7 @@ function App() {
       <RedocStandalone
         specUrl={url}
         options={{
-          nativeScrollbars: true,
+          disableTelemetry: true,
         }}
       />
     );
@@ -98,7 +98,7 @@ function App() {
         <RedocStandalone
           spec={JSON.parse(file)}
           options={{
-            nativeScrollbars: true,
+            disableTelemetry: true,
           }}
         />
       )}
