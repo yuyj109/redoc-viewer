@@ -10,20 +10,22 @@ const useQuery = () => {
   return useMemo(() => new URLSearchParams(search), [search]);
 };
 
+let mermaidDiagramId = 0;
+
 function renderMermaidInRedoc() {
   // Redoc内のmermaidコードブロックをSVGに変換
-  const codeBlocks = document.querySelectorAll('code.language-mermaid');
-  codeBlocks.forEach(async (block, idx) => {
-    const parent = block.parentElement;
+  const codeBlocks = document.querySelectorAll('pre[data-language="mermaid"], code.language-mermaid');
+  codeBlocks.forEach(async (block) => {
+    const parent = block.matches('pre') ? block : block.parentElement;
     if (!parent || parent.getAttribute('data-mermaid-rendered')) return;
+    parent.setAttribute('data-mermaid-rendered', 'pending');
     const chart = block.textContent || '';
     try {
       // mermaid.renderはPromiseを返す（v10以降）
-      const { svg } = await mermaid.render(`redoc-mermaid-${idx}`, chart);
+      const { svg } = await mermaid.render(`redoc-mermaid-${mermaidDiagramId++}`, chart);
       const wrapper = document.createElement('div');
       wrapper.innerHTML = svg;
       parent.replaceWith(wrapper);
-      parent.setAttribute('data-mermaid-rendered', 'true');
     } catch (e) {
       parent.setAttribute('data-mermaid-rendered', 'error');
     }
@@ -68,8 +70,11 @@ function App() {
   };
 
   useEffect(() => {
-    // Redoc描画後にMermaid変換を試みる
-    setTimeout(renderMermaidInRedoc, 500);
+    // Redoc の非同期描画やページ切り替えで追加された図も変換する
+    const observer = new MutationObserver(renderMermaidInRedoc);
+    observer.observe(document.body, { childList: true, subtree: true });
+    renderMermaidInRedoc();
+    return () => observer.disconnect();
   }, [file, url]);
 
   if (url && /https:\/\/.*\.[json|y?ml]/.test(url)) {
