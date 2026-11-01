@@ -1,12 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { RedocStandalone } from 'redoc';
 import yaml from 'js-yaml';
 import mermaid from 'mermaid';
 import './App.css';
 
 const useQuery = () => {
-  const { search } = useLocation();
+  const { search } = window.location;
   return useMemo(() => new URLSearchParams(search), [search]);
 };
 
